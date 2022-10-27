@@ -36,6 +36,7 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      * In order to save the people followed by a user organized in groups, adopt
      * a generic-type Map:  think of what type of keys and values would best suit the requirements
      */
+     private Map<String, Set<U>> followers;
 
     /*
      * [CONSTRUCTORS]
@@ -62,12 +63,16 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      *            application
      */
     public SocialNetworkUserImpl(final String name, final String surname, final String user, final int userAge) {
-        super(null, null, null, 0);
+        super(name, surname, user, 0);
+		this.followers = new HashMap<>();
     }
 
     /*
      * 2) Define a further constructor where the age defaults to -1
      */
+    public SocialNetworkUserImpl(final String name, final String surname, final String user) {
+        super(name, surname, user, -1);
+    }
 
     /*
      * [METHODS]
@@ -76,7 +81,12 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public boolean addFollowedUser(final String circle, final U user) {
-        return false;
+		Set<U> friends = this.followers.get(circle);
+		if(friends == null){
+			friends = new HashSet<>();
+			this.followers.put(circle, friends);
+		}
+		return friends.add(user);
     }
 
     /**
@@ -86,11 +96,25 @@ public final class SocialNetworkUserImpl<U extends User> extends UserImpl implem
      */
     @Override
     public Collection<U> getFollowedUsersInGroup(final String groupName) {
-        return null;
+		final Collection<U> followedUser = this.followers.get(groupName);
+		if(followedUser != null){
+			for(U user : followedUser){
+				System.out.println(user.toString());
+			}
+			//perchè non fa con followedUser?
+			System.out.println(followedUser.size());
+			//return followedUser;
+			return new ArrayList<U>(followedUser);
+		}
+	    return Collections.emptySet();
     }
 
     @Override
     public List<U> getFollowedUsers() {
-        return null;
+		Set<U> followedUser = new HashSet<>();
+		for(final Set<U> circle : this.followers.values()){
+			followedUser.addAll(circle);
+		} 
+        return new ArrayList<U>(followedUser);
     }
 }
